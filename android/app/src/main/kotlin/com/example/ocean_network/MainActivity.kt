@@ -1,4 +1,4 @@
-package com.example.ocean_network
+package com.seantran.ocean_network
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity
