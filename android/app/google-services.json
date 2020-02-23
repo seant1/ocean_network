@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "224624667437",
+    "firebase_url": "https://ocean-network.firebaseio.com",
+    "project_id": "ocean-network",
+    "storage_bucket": "ocean-network.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:224624667437:android:2f7b4a4bb166af1c6901a4",
+        "android_client_info": {
+          "package_name": "com.seantran.ocean_network"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "224624667437-nef2d3traomai0fcchlrgv7bnttq7kjc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5sW-8dKvbNSRbnN7G6KLCx5ewwM1lNHE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "224624667437-nef2d3traomai0fcchlrgv7bnttq7kjc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
