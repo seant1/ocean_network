@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>224624667437-hf4k24lai8b0im110vs0asn3curvvr47.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.224624667437-hf4k24lai8b0im110vs0asn3curvvr47</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCcdAstdN2SMzaAl3t68EN3szWk_zx2fvc</string>
+	<key>GCM_SENDER_ID</key>
+	<string>224624667437</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.seantran.oceanNetwork</string>
+	<key>PROJECT_ID</key>
+	<string>ocean-network</string>
+	<key>STORAGE_BUCKET</key>
+	<string>ocean-network.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:224624667437:ios:818c14c1a4f742036901a4</string>
+	<key>DATABASE_URL</key>
+	<string>https://ocean-network.firebaseio.com</string>
+</dict>
+</plist>
