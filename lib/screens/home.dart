@@ -35,7 +35,7 @@ class _HomeState extends State<Home> {
             animation: activeAnimation,
             callback: (callback) {
               setState(() => activeAnimation = 'idle');
-              print('Animation completed: $callback');
+              print('Animation completed: waves.flr');
             },
           ),
           FlareActor(
@@ -45,7 +45,7 @@ class _HomeState extends State<Home> {
             animation: activeAnimation,
             callback: (callback) {
               setState(() => activeAnimation = 'idle');
-              print('Animation completed: $callback');
+              print('Animation completed: bottle-in.flr');
             },
           ),
         ],
