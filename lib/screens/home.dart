@@ -37,6 +37,7 @@ class _HomeState extends State<Home> {
               DatabaseService().incrementScore(1);
               setState(() {
                 messageOpen = false;
+                messageEditing = false;
                 activeAnimation = 'up';
               });
             }
@@ -46,6 +47,7 @@ class _HomeState extends State<Home> {
               DatabaseService().decrementScore(1);
               setState(() {
                 messageOpen = false;
+                messageEditing = false;
                 activeAnimation = 'down';
               });
             } else {
@@ -62,6 +64,7 @@ class _HomeState extends State<Home> {
               setState(() {
                 messageOpen = false;
                 messageOpenable = true;
+                messageEditing = false;
               });
             }
           }
@@ -95,39 +98,41 @@ class _HomeState extends State<Home> {
               },
             ),
             AnimatedOpacity(
+              // message card
               opacity: messageOpen ? 1 : 0,
               duration: Duration(milliseconds: 150),
               child: Center(
                 child: AnimatedContainer(
-                  duration: Duration(milliseconds: 200),
-                  curve: Curves.easeInOutCirc,
-                  // height: messageOpen ? 1000 : 0,
-                  margin:
-                      EdgeInsets.symmetric(horizontal: 30.0, vertical: 90.0),
-                  padding: EdgeInsets.all(35.0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30.0),
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                          blurRadius: 60.0,
-                          offset: Offset(5, 10),
-                          spreadRadius: -25),
-                    ],
-                  ),
-                  child: Text(
-                    _messageIn
-                        .body, //'"You’ll stop worrying what others think about you when you realize how seldom they do" - David Foster Wallace',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.normal,
-                      fontSize: 25,
-                      decoration: TextDecoration.none,
+                    duration: Duration(milliseconds: 200),
+                    curve: Curves.easeInOutCirc,
+                    // height: messageOpen ? 1000 : 0,
+                    margin:
+                        EdgeInsets.symmetric(horizontal: 30.0, vertical: 90.0),
+                    padding: EdgeInsets.all(35.0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30.0),
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                            blurRadius: 60.0,
+                            offset: Offset(5, 10),
+                            spreadRadius: -25),
+                      ],
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                    child: messageEditing
+                        ? Text('editing REEEEEEEEE')
+                        : Text(
+                            _messageIn
+                                .body, //'"You’ll stop worrying what others think about you when you realize how seldom they do" - David Foster Wallace',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.normal,
+                              fontSize: 25,
+                              decoration: TextDecoration.none,
+                            ),
+                            textAlign: TextAlign.center,
+                          )),
               ),
             )
           ],
