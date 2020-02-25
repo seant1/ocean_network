@@ -33,14 +33,17 @@ class _HomeState extends State<Home> {
         onVerticalDragEnd: (details) async {
           if (details.primaryVelocity < 0) {
             print('SWIPE UP');
-            if (messageOpen)
+            if (messageOpen) {
+              DatabaseService().incrementScore(1);
               setState(() {
                 messageOpen = false;
                 activeAnimation = 'up';
               });
+            }
           } else if (details.primaryVelocity > 0) {
             print('SWIPE DOWN');
             if (messageOpen) {
+              DatabaseService().decrementScore(1);
               setState(() {
                 messageOpen = false;
                 activeAnimation = 'down';
@@ -113,7 +116,8 @@ class _HomeState extends State<Home> {
                     ],
                   ),
                   child: Text(
-                    _messageIn.body, //'"You’ll stop worrying what others think about you when you realize how seldom they do" - David Foster Wallace',
+                    _messageIn
+                        .body, //'"You’ll stop worrying what others think about you when you realize how seldom they do" - David Foster Wallace',
                     style: TextStyle(
                       color: Colors.black87,
                       fontFamily: 'Roboto',

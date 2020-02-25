@@ -21,7 +21,8 @@ class DatabaseService {
               .where('score', isGreaterThanOrEqualTo: randomNo)
               .limit(1)
               .getDocuments();
-      print('db-GET: ${docSnapshot.documents.single.documentID} ${docSnapshot.documents.single.data}');
+      print(
+          'db-GET: ${docSnapshot.documents.single.documentID} ${docSnapshot.documents.single.data}');
       return _parseDocumentSnapshot(docSnapshot.documents.single);
     } catch (e) {
       return Message(body: e.toString());
@@ -90,11 +91,11 @@ class DatabaseService {
           .getDocuments();
       print('db-MaxScore: ${docSnapshot.documents.single.data['score']}');
       if (docSnapshot.documents.single.data['score'] != 0) {
-        print('db-MaxScore: defaulted to 1');
         return docSnapshot.documents.single.data['score'];
       } else {
+        print('db-MaxScore: defaulted to 1');
         return 1;
-      };
+      }
     } catch (e) {
       print('db-MaxScore: ${e.toString()}');
       return 1;
