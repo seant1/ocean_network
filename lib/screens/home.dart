@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
+import 'package:ocean_network/models/message.dart';
+import 'package:ocean_network/services/db-service.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -7,44 +10,57 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  // UI
   String activeAnimation = 'idle';
   bool messageOpen = false;
   bool messageEditing = false;
   bool messageOpenable = false;
+
+  // data
+  Message _messageIn = Message(
+    // might only actually need to be the messageBody
+    body: 'DEFAULT INCOMING',
+    uid: 'defaultman',
+    timestamp: Timestamp.now(),
+    score: 0,
+  );
 
   @override
   Widget build(BuildContext context) {
     return Stack(children: <Widget>[
       GestureDetector(
         // onTap: () => print('TAP'),
-        onVerticalDragEnd: (details) {
+        onVerticalDragEnd: (details) async {
           if (details.primaryVelocity < 0) {
+            print('SWIPE UP');
             if (messageOpen)
               setState(() {
                 messageOpen = false;
                 activeAnimation = 'up';
               });
-            print('SWIPE UP');
           } else if (details.primaryVelocity > 0) {
+            print('SWIPE DOWN');
             if (messageOpen) {
               setState(() {
                 messageOpen = false;
                 activeAnimation = 'down';
               });
             } else {
+              var newMessageIn = await DatabaseService().getMessage();
+              print('NEW messageIn.body: ${newMessageIn.body}');
               setState(() {
+                _messageIn = newMessageIn;
                 activeAnimation = 'start';
               });
             }
-            print('SWIPE DOWN');
           } else {
+            print('DRAG ZERO');
             if (messageOpen) {
               setState(() {
                 messageOpen = false;
                 messageOpenable = true;
               });
             }
-            print('DRAG ZERO');
           }
         },
         child: Stack(
@@ -59,7 +75,7 @@ class _HomeState extends State<Home> {
               animation: activeAnimation,
               callback: (callback) {
                 setState(() => activeAnimation = 'idle');
-                print('Animation completed: waves.flr');
+                print('Animation completed: $callback (waves.flr)');
               },
             ),
             FlareActor(
@@ -72,12 +88,12 @@ class _HomeState extends State<Home> {
                   activeAnimation = 'idle';
                   messageOpenable = true;
                 });
-                print('Animation completed: bottle-in.flr');
+                print('Animation completed: $callback (bottle-in.flr)');
               },
             ),
             AnimatedOpacity(
               opacity: messageOpen ? 1 : 0,
-              duration: Duration(milliseconds: 200),
+              duration: Duration(milliseconds: 150),
               child: Center(
                 child: AnimatedContainer(
                   duration: Duration(milliseconds: 200),
@@ -97,7 +113,7 @@ class _HomeState extends State<Home> {
                     ],
                   ),
                   child: Text(
-                    '"You’ll stop worrying what others think about you when you realize how seldom they do" - David Foster Wallace',
+                    _messageIn.body, //'"You’ll stop worrying what others think about you when you realize how seldom they do" - David Foster Wallace',
                     style: TextStyle(
                       color: Colors.black87,
                       fontFamily: 'Roboto',
