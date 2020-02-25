@@ -24,6 +24,7 @@ class _HomeState extends State<Home> {
     timestamp: Timestamp.now(),
     score: 0,
   );
+  String _messageOut = '';
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +35,14 @@ class _HomeState extends State<Home> {
           if (details.primaryVelocity < 0) {
             print('SWIPE UP');
             if (messageOpen) {
-              DatabaseService().incrementScore(1);
+              if (messageEditing) {
+                _messageOut != ''
+                    ? DatabaseService().postMessage(_messageOut)
+                    : print('ERROR: Cannot post empty string');
+                _messageOut = '';
+              } else {
+                DatabaseService().incrementScore(1);
+              }
               setState(() {
                 messageOpen = false;
                 messageEditing = false;
@@ -44,7 +52,9 @@ class _HomeState extends State<Home> {
           } else if (details.primaryVelocity > 0) {
             print('SWIPE DOWN');
             if (messageOpen) {
-              DatabaseService().decrementScore(1);
+              messageEditing
+                  ? _messageOut = ''
+                  : DatabaseService().decrementScore(1);
               setState(() {
                 messageOpen = false;
                 messageEditing = false;
@@ -120,7 +130,29 @@ class _HomeState extends State<Home> {
                       ],
                     ),
                     child: messageEditing
-                        ? Text('editing REEEEEEEEE')
+                        ? Material(
+                            color: Colors.white,
+                            child: Form(
+                              child: TextFormField(
+                                initialValue: _messageOut,
+                                onChanged: (val) =>
+                                    setState(() => _messageOut = val),
+                                maxLines: null,
+                                style: TextStyle(
+                                  color: Colors.black87,
+                                  fontFamily: 'Roboto',
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 25,
+                                  decoration: TextDecoration.none,
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: 'Add your drop in the ocean',
+                                  hintMaxLines:
+                                      100, // can't have unlimited for some reason
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ))
                         : Text(
                             _messageIn
                                 .body, //'"You’ll stop worrying what others think about you when you realize how seldom they do" - David Foster Wallace',
@@ -162,7 +194,7 @@ class _HomeState extends State<Home> {
         ),
       ),
       Align(
-        alignment: Alignment.bottomCenter,
+        alignment: Alignment.bottomRight,
         child: Container(
           padding: EdgeInsets.all(50.0),
           child: FloatingActionButton(
