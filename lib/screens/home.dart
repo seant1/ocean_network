@@ -19,11 +19,23 @@ class _HomeState extends State<Home> {
         // onTap: () => print('TAP'),
         onVerticalDragEnd: (details) {
           if (details.primaryVelocity < 0) {
-            if (messageOpen) setState(() => messageOpen = false);
+            if (messageOpen)
+              setState(() {
+                messageOpen = false;
+                activeAnimation = 'up';
+              });
             print('SWIPE UP');
           } else if (details.primaryVelocity > 0) {
-            setState(() =>
-                messageOpen ? messageOpen = false : activeAnimation = 'start');
+            if (messageOpen) {
+              setState(() {
+                messageOpen = false;
+                activeAnimation = 'down';
+              });
+            } else {
+              setState(() {
+                activeAnimation = 'start';
+              });
+            }
             print('SWIPE DOWN');
           } else {
             if (messageOpen) {
@@ -51,7 +63,7 @@ class _HomeState extends State<Home> {
               },
             ),
             FlareActor(
-              'assets/bottle-in.flr',
+              'assets/bottle-in-up-down.flr',
               alignment: Alignment.center,
               fit: BoxFit.fitWidth,
               animation: activeAnimation,
@@ -64,11 +76,13 @@ class _HomeState extends State<Home> {
               },
             ),
             AnimatedOpacity(
-              // visible: messageOpen ? true : false,
               opacity: messageOpen ? 1 : 0,
               duration: Duration(milliseconds: 200),
               child: Center(
-                child: Container(
+                child: AnimatedContainer(
+                  duration: Duration(milliseconds: 200),
+                  curve: Curves.easeInOutCirc,
+                  // height: messageOpen ? 1000 : 0,
                   margin:
                       EdgeInsets.symmetric(horizontal: 30.0, vertical: 90.0),
                   padding: EdgeInsets.all(35.0),
@@ -85,7 +99,7 @@ class _HomeState extends State<Home> {
                   child: Text(
                     '"You’ll stop worrying what others think about you when you realize how seldom they do" - David Foster Wallace',
                     style: TextStyle(
-                      color: Colors.black,
+                      color: Colors.black87,
                       fontFamily: 'Roboto',
                       fontWeight: FontWeight.normal,
                       fontSize: 25,
