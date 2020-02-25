@@ -12,9 +12,9 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   // UI
   String activeAnimation = 'idle';
+  bool messageOpenable = false;
   bool messageOpen = false;
   bool messageEditing = false;
-  bool messageOpenable = false;
 
   // data
   Message _messageIn = Message(
@@ -134,6 +134,7 @@ class _HomeState extends State<Home> {
         ),
       ),
       Visibility(
+        // bottle tap gesture detector
         visible: messageOpenable ? true : false,
         child: Center(
           // bottle tap detector
@@ -152,6 +153,23 @@ class _HomeState extends State<Home> {
                 });
               },
             ),
+          ),
+        ),
+      ),
+      Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          padding: EdgeInsets.all(50.0),
+          child: FloatingActionButton(
+            backgroundColor: Colors.grey[400],
+            onPressed: () {
+              print('TAP: edit');
+              setState(() {
+                messageOpen = true;
+                messageEditing = true;
+              });
+            },
+            child: Icon(Icons.edit),
           ),
         ),
       ),
