@@ -47,7 +47,7 @@ class DatabaseService {
       'body': messageBody,
       'uid': 'programmatic',
       'timestamp': Timestamp.now(),
-      'score': 0,
+      'score': 3,
     };
   }
 
