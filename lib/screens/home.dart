@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
@@ -82,7 +84,56 @@ class _HomeState extends State<Home> {
         child: Stack(
           children: <Widget>[
             Container(
+              //background
               color: Colors.grey[100],
+            ),
+            Align(
+              // bottom swipe arrow
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                height: 250,
+                padding: EdgeInsets.all(40),
+                child: AnimatedOpacity(
+                  duration: Duration(milliseconds: 200),
+                  opacity: messageOpen ? 0.5 : 0,
+                  child: FlareActor(
+                    'assets/swipe-guide.flr',
+                    alignment: Alignment.center,
+                    fit: BoxFit.fitHeight,
+                    animation: 'start',
+                    callback: (callback) {
+                      // setState(() => activeAnimation = 'idle');
+                      print('Animation completed: $callback (swipe-guide.flr)');
+                    },
+                  ),
+                ),
+              ),
+            ),
+            Align(
+              // top swipe arrow
+              alignment: Alignment.topCenter,
+              child: Container(
+                height: messageOpen ? 250 : 200,
+                padding: EdgeInsets.all(40),
+                child: AnimatedOpacity(
+                  duration: Duration(milliseconds: 200),
+                  opacity: 0.5,
+                  child: Transform.rotate(
+                    child: FlareActor(
+                      'assets/swipe-guide.flr',
+                      alignment: Alignment.center,
+                      fit: BoxFit.fitHeight,
+                      animation: 'start',
+                      callback: (callback) {
+                        // setState(() => activeAnimation = 'idle');
+                        print(
+                            'Animation completed: $callback (swipe-guide.flr)');
+                      },
+                    ),
+                    angle: messageOpen ? pi : 0,
+                  ),
+                ),
+              ),
             ),
             FlareActor(
               'assets/waves.flr',
