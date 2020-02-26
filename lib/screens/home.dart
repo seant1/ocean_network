@@ -17,6 +17,8 @@ class _HomeState extends State<Home> {
   bool messageOpenable = false;
   bool messageOpen = false;
   bool messageEditing = false;
+  String lastVote =
+      ''; // TODO: find more elegant solution for chaining animations conditionally
 
   // data
   Message _messageIn = Message(
@@ -48,7 +50,8 @@ class _HomeState extends State<Home> {
               setState(() {
                 messageOpen = false;
                 messageEditing = false;
-                activeAnimation = 'up';
+                activeAnimation = 'close';
+                lastVote = 'up';
               });
             }
           } else if (details.primaryVelocity > 0) {
@@ -60,7 +63,8 @@ class _HomeState extends State<Home> {
               setState(() {
                 messageOpen = false;
                 messageEditing = false;
-                activeAnimation = 'down';
+                activeAnimation = 'close';
+                lastVote = 'down';
               });
             } else {
               var newMessageIn = await DatabaseService().getMessage();
@@ -77,6 +81,8 @@ class _HomeState extends State<Home> {
                 messageOpen = false;
                 messageOpenable = true;
                 messageEditing = false;
+                activeAnimation = 'close';
+                lastVote = 'cancel';
               });
             }
           }
@@ -146,18 +152,39 @@ class _HomeState extends State<Home> {
               },
             ),
             FlareActor(
-              'assets/bottle-in-up-down.flr',
+              'assets/bottle-master.flr',
               alignment: Alignment.center,
               fit: BoxFit.fitWidth,
               animation: activeAnimation,
               callback: (callback) {
+                if (callback == 'open') {
+                  setState(() {
+                    messageOpen = true;
+                    messageOpenable = false;
+                  });
+                }
+                if (callback == 'close') {
+                  print('bottle closed!!!!!!!!!!');
+                  if (lastVote == 'up' || lastVote == 'down') {
+                    print('lastVote: $lastVote');
+                    setState(() {
+                      activeAnimation = lastVote;
+                    });
+                  }
+                } else {
+                  setState(() {
+                    activeAnimation = 'idle';
+                  });
+                }
                 setState(() {
-                  activeAnimation = 'idle';
+                  // activeAnimation = 'idle';
+
                   messageOpenable = true;
                 });
-                print('Animation completed: $callback (bottle-in.flr)');
+                print('Animation completed: $callback (bottle-master.flr)');
               },
             ),
+            Text(activeAnimation),
             AnimatedOpacity(
               // message card
               opacity: messageOpen ? 1 : 0,
@@ -236,8 +263,7 @@ class _HomeState extends State<Home> {
               onTap: () {
                 print('TAP: bottle');
                 setState(() {
-                  messageOpen = true;
-                  messageOpenable = false;
+                  activeAnimation = 'open';
                 });
               },
             ),
