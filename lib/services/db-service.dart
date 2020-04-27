@@ -10,15 +10,29 @@ class DatabaseService {
   final CollectionReference messageCollection =
       Firestore.instance.collection('messages');
 
+  int _getScore(int maxScore) {
+    int randCase = rng.nextInt(3);
+    double randomDouble = rng.nextDouble();// rng.nextInt(await getMaxScore());
+    switch (randCase) {
+      case 0:
+        print('db-getScore: New (3/$maxScore)');
+        return 3;
+        break;
+      default:
+        int scaledRandom = (randomDouble * (maxScore + 1)).toInt();
+        print('db-getScore: Random ($scaledRandom/$maxScore)');
+        return scaledRandom;
+        break;
+    }
+  }
+
   // Get random message
   Future<Message> getMessage() async {
-    var randomNo = rng.nextInt(await getMaxScore());
-    print('db-randomNo: $randomNo');
     try {
       var docSnapshot =
           // await messageCollection.orderBy('score', descending: true).limit(1).getDocuments();
           await messageCollection
-              .where('score', isGreaterThanOrEqualTo: randomNo)
+              .where('score', isGreaterThanOrEqualTo: _getScore(await getMaxScore()))
               .limit(1)
               .getDocuments();
       print(
@@ -89,7 +103,7 @@ class DatabaseService {
           .orderBy('score', descending: true)
           .limit(1)
           .getDocuments();
-      print('db-MaxScore: ${docSnapshot.documents.single.data['score']}');
+      // print('db-MaxScore: ${docSnapshot.documents.single.data['score']}');
       if (docSnapshot.documents.single.data['score'] != 0) {
         return docSnapshot.documents.single.data['score'];
       } else {
