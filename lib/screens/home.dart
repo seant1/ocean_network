@@ -287,6 +287,59 @@ class _HomeState extends State<Home> {
           ),
         ),
       ),
+      Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          padding: EdgeInsets.all(50.0),
+          child: FloatingActionButton(
+            backgroundColor: Colors.grey[400],
+            onPressed: () {
+              print('TAP: send');
+              if (messageOpen) {
+                if (messageEditing) {
+                  _messageOut != ''
+                      ? DatabaseService().postMessage(_messageOut)
+                      : print('ERROR: Cannot post empty string');
+                  _messageOut = '';
+                } else {
+                  DatabaseService().incrementScore(1);
+                }
+                setState(() {
+                  messageOpen = false;
+                  messageEditing = false;
+                  activeAnimation = 'close';
+                  lastVote = 'up';
+                });
+              }
+            },
+            child: Icon(Icons.send),
+          ),
+        ),
+      ),
+      Align(
+        alignment: Alignment.bottomLeft,
+        child: Container(
+          padding: EdgeInsets.all(50.0),
+          child: FloatingActionButton(
+            backgroundColor: Colors.grey[400],
+            onPressed: () {
+              print('TAP: discard');
+              if (messageOpen) {
+                messageEditing
+                    ? _messageOut = ''
+                    : DatabaseService().decrementScore(1);
+                setState(() {
+                  messageOpen = false;
+                  messageEditing = false;
+                  activeAnimation = 'close';
+                  lastVote = 'down';
+                });
+              }
+            },
+            child: Icon(Icons.delete),
+          ),
+        ),
+      ),
     ]);
   }
 }
