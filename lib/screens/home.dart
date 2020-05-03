@@ -42,6 +42,7 @@ class _HomeState extends State<Home> {
         onVerticalDragEnd: (details) async {
           if (details.primaryVelocity < 0) {
             print('SWIPE UP');
+            takeMessage(); // TODO: run takeMessage on a random timer
             // if (messageOpen) {
             //   // any changes, also change send button
             //   postMessage();
@@ -106,7 +107,7 @@ class _HomeState extends State<Home> {
               alignment: Alignment.bottomCenter,
               fit: BoxFit.fitWidth,
             ),
-            Text('messageOpen: ${messageOpen}'),
+            Text('messageOpen: ${_messageBayIn.body}'),
             AnimatedOpacity(
               // message card
               opacity: messageOpen ? 1 : 0,
@@ -290,7 +291,6 @@ class _HomeState extends State<Home> {
     setState(() {
       _messageBayIn = _gotMessage;
     });
-    takeMessage();
   }
 
   void takeMessage() {
@@ -299,5 +299,6 @@ class _HomeState extends State<Home> {
       inboxEmpty = false;
       animateFlag = 'up';
     });
+    getMessage(); // get a new message into the messageBayIn
   }
 }
