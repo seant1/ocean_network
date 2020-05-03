@@ -14,11 +14,18 @@ class _HomeState extends State<Home> {
   String animateFlag = 'idle';
   String animateDoor = 'idle';
   String animateSend = 'idle';
-  bool messageOpenable = false;
+  bool inboxEmpty = true;
   bool messageOpen = false;
   bool messageEditing = false;
 
   // data
+  Message _messageBayIn = Message(
+    // might only actually need to be the messageBody
+    body: 'DEFAULT INCOMING',
+    uid: 'defaultman',
+    timestamp: Timestamp.now(),
+    score: 0,
+  );
   Message _messageIn = Message(
     // might only actually need to be the messageBody
     body: 'DEFAULT INCOMING',
@@ -35,26 +42,30 @@ class _HomeState extends State<Home> {
         onVerticalDragEnd: (details) async {
           if (details.primaryVelocity < 0) {
             print('SWIPE UP');
-            if (messageOpen) {
-              postMessage();
-              setState(() {
-                messageOpenable = false;
-                closeMessage();
-              });
-            }
+            takeMessage(); // TODO: run takeMessage on a random timer
+            // if (messageOpen) {
+            //   // any changes, also change send button
+            //   postMessage();
+            //   closeMessage();
+            //   setState(() {
+            //     inboxEmpty = true;
+            //     animateSend = 'start';
+            //   });
+            // }
           } else if (details.primaryVelocity > 0) {
             print('SWIPE DOWN');
-            if (messageOpen) {
-              discardMessage();
-            } else {
-              await getMessage();
-            }
+            // if (messageOpen) {
+            //   discardMessage();
+            //   inboxEmpty = true;
+            // } else {
+            await getMessage();
+            // }
           } else {
             print('DRAG ZERO');
             if (messageOpen) {
+              closeMessage();
               setState(() {
-                messageOpenable = true;
-                closeMessage();
+                inboxEmpty = false; // TODO: handle when dismiss edit card
               });
             }
           }
@@ -96,8 +107,7 @@ class _HomeState extends State<Home> {
               alignment: Alignment.bottomCenter,
               fit: BoxFit.fitWidth,
             ),
-            Text('DEBUG: ${messageOpenable.toString()}'),
-            Text(messageOpenable.toString()),
+            Text('messageOpen: ${_messageBayIn.body}'),
             AnimatedOpacity(
               // message card
               opacity: messageOpen ? 1 : 0,
@@ -163,7 +173,7 @@ class _HomeState extends State<Home> {
       ),
       Visibility(
         // bottle tap gesture detector
-        visible: messageOpenable ? true : false,
+        visible: inboxEmpty ? false : true,
         child: Center(
           // bottle tap detector
           heightFactor: 6.5,
@@ -206,14 +216,10 @@ class _HomeState extends State<Home> {
             onPressed: () {
               print('TAP: send');
               if (messageOpen) {
-                if (messageEditing) {
-                  postMessage();
-                } else {
-                  DatabaseService().incrementScore(1);
-                }
+                postMessage();
+                closeMessage();
                 setState(() {
-                  closeMessage();
-                  messageOpenable = false;
+                  inboxEmpty = true;
                   animateSend = 'start';
                 });
               }
@@ -230,8 +236,12 @@ class _HomeState extends State<Home> {
             backgroundColor: Colors.grey[400],
             onPressed: () {
               print('TAP: discard');
-              if (messageOpen) discardMessage();
-              messageOpenable = false;
+              if (messageOpen) {
+                discardMessage();
+                setState(() {
+                  inboxEmpty = true;
+                });
+              }
             },
             child: Icon(Icons.delete),
           ),
@@ -244,7 +254,7 @@ class _HomeState extends State<Home> {
     messageEditing ? _messageBayOut = '' : DatabaseService().decrementScore(1);
     setState(() {
       closeMessage();
-      messageOpenable = false;
+      inboxEmpty = true;
     });
   }
 
@@ -269,19 +279,26 @@ class _HomeState extends State<Home> {
     print('TAP: bottle');
     setState(() {
       messageOpen = true;
-      messageOpenable = false;
+      inboxEmpty = true;
       animateDoor = 'open';
       animateFlag = 'down';
     });
   }
 
   Future getMessage() async {
-    var newMessageIn = await DatabaseService().getMessage();
+    Message _gotMessage = await DatabaseService().getMessage();
     // print('NEW messageIn.body: ${newMessageIn.body}');
     setState(() {
-      _messageIn = newMessageIn;
-      messageOpenable = true;
+      _messageBayIn = _gotMessage;
+    });
+  }
+
+  void takeMessage() {
+    setState(() {
+      _messageIn = _messageBayIn;
+      inboxEmpty = false;
       animateFlag = 'up';
     });
+    getMessage(); // get a new message into the messageBayIn
   }
 }
