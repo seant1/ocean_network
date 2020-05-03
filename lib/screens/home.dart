@@ -14,6 +14,9 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   // UI
   String activeAnimation = 'idle';
+  String animateFlag = 'idle';
+  String animateDoor = 'idle';
+  String animateSend = 'idle';
   bool messageOpenable = false;
   bool messageOpen = false;
   bool messageEditing = false;
@@ -48,9 +51,7 @@ class _HomeState extends State<Home> {
                 DatabaseService().incrementScore(1);
               }
               setState(() {
-                messageOpen = false;
-                messageEditing = false;
-                activeAnimation = 'close';
+                closeMessage();
                 lastVote = 'up';
               });
             }
@@ -61,18 +62,11 @@ class _HomeState extends State<Home> {
                   ? _messageOut = ''
                   : DatabaseService().decrementScore(1);
               setState(() {
-                messageOpen = false;
-                messageEditing = false;
-                activeAnimation = 'close';
+                closeMessage();
                 lastVote = 'down';
               });
             } else {
-              var newMessageIn = await DatabaseService().getMessage();
-              print('NEW messageIn.body: ${newMessageIn.body}');
-              setState(() {
-                _messageIn = newMessageIn;
-                activeAnimation = 'start';
-              });
+              await getMessage();
             }
           } else {
             print('DRAG ZERO');
@@ -82,6 +76,7 @@ class _HomeState extends State<Home> {
                 messageOpenable = true;
                 messageEditing = false;
                 activeAnimation = 'close';
+                animateDoor = 'close';
                 lastVote = 'cancel';
               });
             }
@@ -91,7 +86,7 @@ class _HomeState extends State<Home> {
           children: <Widget>[
             Container(
               //background
-              color: Colors.grey[100],
+              color: Colors.grey[900],
             ),
             Align(
               // bottom swipe arrow
@@ -142,9 +137,35 @@ class _HomeState extends State<Home> {
               ),
             ),
             FlareActor(
+              'assets/mailbox_v03-send.flr',
+              alignment: Alignment.bottomCenter,
+              fit: BoxFit.fitWidth,
+              animation: animateSend,
+              callback: (callback) {
+                setState(() => animateSend = 'idle');
+              },
+            ),
+            FlareActor(
               'assets/mailbox_v03-mailbox.flr',
-              alignment: Alignment.center,
-              fit: BoxFit.fitHeight,
+              alignment: Alignment.bottomCenter,
+              fit: BoxFit.fitWidth,
+            ),
+            FlareActor(
+              'assets/mailbox_v03-door.flr',
+              alignment: Alignment.bottomCenter,
+              fit: BoxFit.fitWidth,
+              animation: animateDoor,
+            ),
+            FlareActor(
+              'assets/mailbox_v03-flag.flr',
+              alignment: Alignment.bottomCenter,
+              fit: BoxFit.fitWidth,
+              animation: animateFlag,
+            ),
+            FlareActor(
+              'assets/mailbox_v03-ground.flr',
+              alignment: Alignment.bottomCenter,
+              fit: BoxFit.fitWidth,
             ),
             FlareActor(
               'assets/waves.flr',
@@ -255,7 +276,7 @@ class _HomeState extends State<Home> {
       ),
       Visibility(
         // bottle tap gesture detector
-        visible: messageOpenable ? true : false,
+        visible: true,//messageOpenable ? true : false,
         child: Center(
           // bottle tap detector
           heightFactor: 6.5,
@@ -266,10 +287,7 @@ class _HomeState extends State<Home> {
             alignment: Alignment.center,
             child: GestureDetector(
               onTap: () {
-                print('TAP: bottle');
-                setState(() {
-                  activeAnimation = 'open';
-                });
+                openMessage();
               },
             ),
           ),
@@ -300,6 +318,9 @@ class _HomeState extends State<Home> {
             backgroundColor: Colors.grey[400],
             onPressed: () {
               print('TAP: send');
+              setState(() {
+                animateSend = 'start';
+              });
               if (messageOpen) {
                 if (messageEditing) {
                   _messageOut != ''
@@ -310,9 +331,7 @@ class _HomeState extends State<Home> {
                   DatabaseService().incrementScore(1);
                 }
                 setState(() {
-                  messageOpen = false;
-                  messageEditing = false;
-                  activeAnimation = 'close';
+                  closeMessage();
                   lastVote = 'up';
                 });
               }
@@ -334,9 +353,7 @@ class _HomeState extends State<Home> {
                     ? _messageOut = ''
                     : DatabaseService().decrementScore(1);
                 setState(() {
-                  messageOpen = false;
-                  messageEditing = false;
-                  activeAnimation = 'close';
+                  closeMessage();
                   lastVote = 'down';
                 });
               }
@@ -346,5 +363,31 @@ class _HomeState extends State<Home> {
         ),
       ),
     ]);
+  }
+
+  void closeMessage() {
+    messageOpen = false;
+    messageEditing = false;
+    activeAnimation = 'close';
+    animateDoor = 'close';
+  }
+
+  void openMessage() {
+    print('TAP: bottle');
+    setState(() {
+      activeAnimation = 'open'; // callback for open animation opens message
+      animateDoor = 'open';
+      animateFlag = 'down';
+    });
+  }
+
+  Future getMessage() async {
+    var newMessageIn = await DatabaseService().getMessage();
+    // print('NEW messageIn.body: ${newMessageIn.body}');
+    setState(() {
+      _messageIn = newMessageIn;
+      activeAnimation = 'up';
+      animateFlag = 'up';
+    });
   }
 }
