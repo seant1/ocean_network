@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +11,6 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   // UI
-  String activeAnimation = 'idle';
   String animateFlag = 'idle';
   String animateDoor = 'idle';
   String animateSend = 'idle';
@@ -99,7 +96,7 @@ class _HomeState extends State<Home> {
               alignment: Alignment.bottomCenter,
               fit: BoxFit.fitWidth,
             ),
-            // Text(activeAnimation),
+            Text('DEBUG: ${messageOpenable.toString()}'),
             Text(messageOpenable.toString()),
             AnimatedOpacity(
               // message card
@@ -265,7 +262,6 @@ class _HomeState extends State<Home> {
   void closeMessage() {
     messageOpen = false;
     messageEditing = false;
-    activeAnimation = 'close';
     animateDoor = 'close';
   }
 
@@ -274,7 +270,6 @@ class _HomeState extends State<Home> {
     setState(() {
       messageOpen = true;
       messageOpenable = false;
-      activeAnimation = 'open'; // callback for open animation opens message
       animateDoor = 'open';
       animateFlag = 'down';
     });
@@ -286,7 +281,6 @@ class _HomeState extends State<Home> {
     setState(() {
       _messageIn = newMessageIn;
       messageOpenable = true;
-      activeAnimation = 'up';
       animateFlag = 'up';
     });
   }
