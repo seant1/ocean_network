@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
@@ -13,12 +11,12 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   // UI
-  String activeAnimation = 'idle';
+  String animateFlag = 'idle';
+  String animateDoor = 'idle';
+  String animateSend = 'idle';
   bool messageOpenable = false;
   bool messageOpen = false;
   bool messageEditing = false;
-  String lastVote =
-      ''; // TODO: find more elegant solution for chaining animations conditionally
 
   // data
   Message _messageIn = Message(
@@ -28,61 +26,35 @@ class _HomeState extends State<Home> {
     timestamp: Timestamp.now(),
     score: 0,
   );
-  String _messageOut = '';
+  String _messageBayOut = '';
 
   @override
   Widget build(BuildContext context) {
     return Stack(children: <Widget>[
       GestureDetector(
-        // onTap: () => print('TAP'),
         onVerticalDragEnd: (details) async {
           if (details.primaryVelocity < 0) {
             print('SWIPE UP');
             if (messageOpen) {
-              if (messageEditing) {
-                _messageOut != ''
-                    ? DatabaseService().postMessage(_messageOut)
-                    : print('ERROR: Cannot post empty string');
-                _messageOut = '';
-              } else {
-                DatabaseService().incrementScore(1);
-              }
+              postMessage();
               setState(() {
-                messageOpen = false;
-                messageEditing = false;
-                activeAnimation = 'close';
-                lastVote = 'up';
+                messageOpenable = false;
+                closeMessage();
               });
             }
           } else if (details.primaryVelocity > 0) {
             print('SWIPE DOWN');
             if (messageOpen) {
-              messageEditing
-                  ? _messageOut = ''
-                  : DatabaseService().decrementScore(1);
-              setState(() {
-                messageOpen = false;
-                messageEditing = false;
-                activeAnimation = 'close';
-                lastVote = 'down';
-              });
+              discardMessage();
             } else {
-              var newMessageIn = await DatabaseService().getMessage();
-              print('NEW messageIn.body: ${newMessageIn.body}');
-              setState(() {
-                _messageIn = newMessageIn;
-                activeAnimation = 'start';
-              });
+              await getMessage();
             }
           } else {
             print('DRAG ZERO');
             if (messageOpen) {
               setState(() {
-                messageOpen = false;
                 messageOpenable = true;
-                messageEditing = false;
-                activeAnimation = 'close';
-                lastVote = 'cancel';
+                closeMessage();
               });
             }
           }
@@ -91,100 +63,41 @@ class _HomeState extends State<Home> {
           children: <Widget>[
             Container(
               //background
-              color: Colors.grey[100],
+              color: Colors.grey[900],
             ),
-            Align(
-              // bottom swipe arrow
+            FlareActor(
+              'assets/mailbox_v03-send.flr',
               alignment: Alignment.bottomCenter,
-              child: Container(
-                height: 250,
-                padding: EdgeInsets.all(40),
-                child: AnimatedOpacity(
-                  duration: Duration(milliseconds: 200),
-                  opacity: messageOpen ? 0.5 : 0,
-                  child: FlareActor(
-                    'assets/swipe-guide.flr',
-                    alignment: Alignment.center,
-                    fit: BoxFit.fitHeight,
-                    animation: 'start',
-                    callback: (callback) {
-                      // setState(() => activeAnimation = 'idle');
-                      print('Animation completed: $callback (swipe-guide.flr)');
-                    },
-                  ),
-                ),
-              ),
-            ),
-            Align(
-              // top swipe arrow
-              alignment: Alignment.topCenter,
-              child: Container(
-                height: messageOpen ? 250 : 200,
-                padding: EdgeInsets.all(40),
-                child: AnimatedOpacity(
-                  duration: Duration(milliseconds: 200),
-                  opacity: 0.5,
-                  child: Transform.rotate(
-                    child: FlareActor(
-                      'assets/swipe-guide.flr',
-                      alignment: Alignment.center,
-                      fit: BoxFit.fitHeight,
-                      animation: 'start',
-                      callback: (callback) {
-                        // setState(() => activeAnimation = 'idle');
-                        print(
-                            'Animation completed: $callback (swipe-guide.flr)');
-                      },
-                    ),
-                    angle: messageOpen ? pi : 0,
-                  ),
-                ),
-              ),
-            ),
-            FlareActor(
-              'assets/waves.flr',
-              alignment: Alignment.center,
               fit: BoxFit.fitWidth,
-              animation: activeAnimation,
+              animation: animateSend,
               callback: (callback) {
-                setState(() => activeAnimation = 'idle');
-                print('Animation completed: $callback (waves.flr)');
+                setState(() => animateSend = 'idle');
               },
             ),
             FlareActor(
-              'assets/bottle-master.flr',
-              alignment: Alignment.center,
+              'assets/mailbox_v03-mailbox.flr',
+              alignment: Alignment.bottomCenter,
               fit: BoxFit.fitWidth,
-              animation: activeAnimation,
-              callback: (callback) {
-                if (callback == 'open') {
-                  setState(() {
-                    messageOpen = true;
-                    messageOpenable = false;
-                  });
-                }
-                if (callback == 'close') {
-                  print('bottle closed!!!!!!!!!!');
-                  if (lastVote == 'up' || lastVote == 'down') {
-                    print('lastVote: $lastVote');
-                    setState(() {
-                      activeAnimation = lastVote;
-                    });
-                  }
-                } else {
-                  setState(() {
-                    activeAnimation = 'idle';
-                  });
-                }
-                setState(() {
-                  // activeAnimation = 'idle';
-
-                  messageOpenable = true;
-                });
-                print('Animation completed: $callback (bottle-master.flr)');
-              },
             ),
-            Text(activeAnimation),
+            FlareActor(
+              'assets/mailbox_v03-door.flr',
+              alignment: Alignment.bottomCenter,
+              fit: BoxFit.fitWidth,
+              animation: animateDoor,
+            ),
+            FlareActor(
+              'assets/mailbox_v03-flag.flr',
+              alignment: Alignment.bottomCenter,
+              fit: BoxFit.fitWidth,
+              animation: animateFlag,
+            ),
+            FlareActor(
+              'assets/mailbox_v03-ground.flr',
+              alignment: Alignment.bottomCenter,
+              fit: BoxFit.fitWidth,
+            ),
+            Text('DEBUG: ${messageOpenable.toString()}'),
+            Text(messageOpenable.toString()),
             AnimatedOpacity(
               // message card
               opacity: messageOpen ? 1 : 0,
@@ -212,9 +125,9 @@ class _HomeState extends State<Home> {
                             color: Colors.white,
                             child: Form(
                               child: TextFormField(
-                                initialValue: _messageOut,
+                                initialValue: _messageBayOut,
                                 onChanged: (val) =>
-                                    setState(() => _messageOut = val),
+                                    setState(() => _messageBayOut = val),
                                 maxLines: null,
                                 style: TextStyle(
                                   color: Colors.black87,
@@ -224,7 +137,7 @@ class _HomeState extends State<Home> {
                                   decoration: TextDecoration.none,
                                 ),
                                 decoration: InputDecoration(
-                                  hintText: 'Add your drop in the ocean',
+                                  hintText: 'Write to a random person',
                                   hintMaxLines:
                                       100, // can't have unlimited for some reason
                                   border: InputBorder.none,
@@ -261,10 +174,7 @@ class _HomeState extends State<Home> {
             alignment: Alignment.center,
             child: GestureDetector(
               onTap: () {
-                print('TAP: bottle');
-                setState(() {
-                  activeAnimation = 'open';
-                });
+                openMessage();
               },
             ),
           ),
@@ -287,6 +197,91 @@ class _HomeState extends State<Home> {
           ),
         ),
       ),
+      Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          padding: EdgeInsets.all(50.0),
+          child: FloatingActionButton(
+            backgroundColor: Colors.grey[400],
+            onPressed: () {
+              print('TAP: send');
+              if (messageOpen) {
+                if (messageEditing) {
+                  postMessage();
+                } else {
+                  DatabaseService().incrementScore(1);
+                }
+                setState(() {
+                  closeMessage();
+                  messageOpenable = false;
+                  animateSend = 'start';
+                });
+              }
+            },
+            child: Icon(Icons.send),
+          ),
+        ),
+      ),
+      Align(
+        alignment: Alignment.bottomLeft,
+        child: Container(
+          padding: EdgeInsets.all(50.0),
+          child: FloatingActionButton(
+            backgroundColor: Colors.grey[400],
+            onPressed: () {
+              print('TAP: discard');
+              if (messageOpen) discardMessage();
+              messageOpenable = false;
+            },
+            child: Icon(Icons.delete),
+          ),
+        ),
+      ),
     ]);
+  }
+
+  void discardMessage() {
+    messageEditing ? _messageBayOut = '' : DatabaseService().decrementScore(1);
+    setState(() {
+      closeMessage();
+      messageOpenable = false;
+    });
+  }
+
+  void postMessage() {
+    if (messageEditing) {
+      _messageBayOut != ''
+          ? DatabaseService().postMessage(_messageBayOut)
+          : print('ERROR: Cannot post empty string');
+      _messageBayOut = '';
+    } else {
+      DatabaseService().incrementScore(1);
+    }
+  }
+
+  void closeMessage() {
+    messageOpen = false;
+    messageEditing = false;
+    animateDoor = 'close';
+  }
+
+  void openMessage() {
+    print('TAP: bottle');
+    setState(() {
+      messageOpen = true;
+      messageOpenable = false;
+      animateDoor = 'open';
+      animateFlag = 'down';
+    });
+  }
+
+  Future getMessage() async {
+    var newMessageIn = await DatabaseService().getMessage();
+    // print('NEW messageIn.body: ${newMessageIn.body}');
+    setState(() {
+      _messageIn = newMessageIn;
+      messageOpenable = true;
+      animateFlag = 'up';
+    });
   }
 }
