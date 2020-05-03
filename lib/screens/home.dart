@@ -142,6 +142,11 @@ class _HomeState extends State<Home> {
               ),
             ),
             FlareActor(
+              'assets/mailbox_v03-mailbox.flr',
+              alignment: Alignment.center,
+              fit: BoxFit.fitHeight,
+            ),
+            FlareActor(
               'assets/waves.flr',
               alignment: Alignment.center,
               fit: BoxFit.fitWidth,
