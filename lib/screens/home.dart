@@ -9,7 +9,36 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with WidgetsBindingObserver {
+  // lifecycle events
+  AppLifecycleState _lastLifecycleState;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    print('🔄----------VIEWDIDLOAD');
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      // went to Background
+      print('🔄----------PAUSE');
+    }
+    if (state == AppLifecycleState.resumed) {
+      // came back to Foreground
+      print('🔄----------RESUMED');
+    }
+  }
+
   // UI
   String animateSend = 'idle';
   bool inboxEmpty = true;
@@ -89,7 +118,7 @@ class _HomeState extends State<Home> {
               fit: BoxFit.fitWidth,
             ),
             // Text('messageOpen: ${_messageBayIn.body}'),
-            Text('messageOpen: $messageOpen'),
+            Text('bay: ${_messageBayIn.body}'),
             AnimatedOpacity(
               // message card
               opacity: messageOpen ? 1 : 0,
