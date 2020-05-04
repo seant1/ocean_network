@@ -9,7 +9,8 @@ class DatabaseService {
   final CollectionReference messageCollection =
       Firestore.instance.collection('messages');
 
-  int lastScore;
+  int _lastScore;
+  List<int> _lastMaxScore = [4];
 
   int _getScore(int maxScore) {
     int score;
@@ -26,12 +27,13 @@ class DatabaseService {
         score = scaledRandom;
         break;
     }
-    if (score == lastScore) { // if duplicate consecutive scores
+    if (score == _lastScore) {
+      // if duplicate consecutive scores
       print('duplicate consecutive score ($score --> ${score + 1})');
       score++;
     }
     print('🔥 db-getScore: ($score/$maxScore)');
-    lastScore = score;
+    _lastScore = score;
     return score;
   }
 
@@ -107,21 +109,32 @@ class DatabaseService {
   }
 
   Future<int> getMaxScore() async {
+    print('lastMaxScore: $_lastMaxScore');
+    int _maxScore;
     try {
-      var docSnapshot = await messageCollection
-          .orderBy('score', descending: true)
-          .limit(1)
-          .getDocuments();
+      var docSnapshot = _lastMaxScore[0] >= 4 // reduces max score every time until 4, then restarts from max
+          ? await messageCollection
+              .orderBy('score', descending: true)
+              .startAfter(_lastMaxScore) // second highest scoring message
+              .limit(1)
+              .getDocuments()
+          : await messageCollection // actual highest scoring message (should only be run initially)
+              .orderBy('score', descending: true)
+              .limit(1)
+              .getDocuments();
       // print('db-MaxScore: ${docSnapshot.documents.single.data['score']}');
       if (docSnapshot.documents.single.data['score'] != 0) {
-        return docSnapshot.documents.single.data['score'];
+        _maxScore = docSnapshot.documents.single.data['score'];
       } else {
-        print('db-MaxScore: defaulted to 1');
-        return 1;
+        print('db-MaxScore: defaulted to 4');
+        return 4;
       }
     } catch (e) {
       print('db-MaxScore: ${e.toString()}');
-      return 1;
+      return 4;
     }
+    if (_lastMaxScore.isNotEmpty) _lastMaxScore.clear();
+    _lastMaxScore.add(_maxScore);
+    return _maxScore;
   }
 }
