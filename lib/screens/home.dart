@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +20,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     print('🔄----------VIEWDIDLOAD');
+    getMessage();
+    startRandomTimer();
   }
 
   @override
@@ -36,6 +40,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       // came back to Foreground
       print('🔄----------RESUMED');
+      startRandomTimer();
     }
   }
 
@@ -68,13 +73,13 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       GestureDetector(
         onVerticalDragEnd: (details) async {
           if (details.primaryVelocity < 0) {
-            print('🔼 SWIPE UP');
+            print('SWIPE UP');
             takeMessage(); // TODO: run takeMessage on a random timer
           } else if (details.primaryVelocity > 0) {
-            print('🔽 SWIPE DOWN');
+            print('SWIPE DOWN');
             await getMessage();
           } else {
-            print('⏺ DRAG ZERO');
+            print('DRAG ZERO');
             if (messageOpen) {
               closeMessage();
             }
@@ -259,6 +264,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   }
 
   void takeMessage() {
+    print('📥📫 take message');
     setState(() {
       _messageIn = _messageBayIn;
       inboxEmpty = false;
@@ -297,6 +303,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         inboxEmpty = true;
         animateSend = 'start';
       });
+      startRandomTimer();
     }
   }
 
@@ -311,6 +318,21 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       }
       setState(() {
         inboxEmpty = true;
+      });
+      startRandomTimer();
+    }
+  }
+
+  void startRandomTimer() {
+    if (inboxEmpty) {
+      const int maxTime = 20;
+      const int minTime = 5;
+      Duration duration =
+          Duration(seconds: rng.nextInt(maxTime - minTime) + minTime);
+      print('⏳ startRandomTimer (${duration.inSeconds} seconds)');
+      new Timer(duration, () {
+        print('⌛ done');
+        takeMessage();
       });
     }
   }
