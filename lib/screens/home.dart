@@ -53,6 +53,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   Timer _timer = new Timer(Duration(seconds: 0), () => print('⏳ init'));
 
   // data
+  DatabaseService db = DatabaseService();
   Message _messageBayIn = Message(
     // might only actually need to be the messageBody
     id: 'defaultId',
@@ -253,7 +254,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   Future getMessage() async {
     // gets a message from Firestore into messageBayIn
-    Message _gotMessage = await DatabaseService().getMessage();
+    Message _gotMessage = await db.getMessage();
     // print('NEW messageIn.body: ${newMessageIn.body}');
     setState(() {
       _messageBayIn = _gotMessage;
@@ -289,13 +290,13 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     if (messageOpen) {
       if (messageEditing) {
         _messageBayOut != ''
-            ? DatabaseService().postMessage(_messageBayOut)
+            ? db.postMessage(_messageBayOut)
             : print('ERROR: Cannot post empty string');
         setState(() {
           _messageBayOut = '';
         });
       } else {
-        DatabaseService().incrementScore(_messageIn.id);
+        db.incrementScore(_messageIn.id);
       }
       setState(() {
         inboxEmpty = true;
@@ -312,7 +313,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           _messageBayOut = '';
         });
       } else {
-        DatabaseService().decrementScore(_messageIn.id);
+        db.decrementScore(_messageIn.id);
       }
       setState(() {
         inboxEmpty = true;
