@@ -76,14 +76,16 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         onVerticalDragEnd: (details) async {
           if (details.primaryVelocity < 0) {
             print('SWIPE UP');
-            takeMessage(); // TODO: remove test
+            // takeMessage(); // TODO: remove test
           } else if (details.primaryVelocity > 0) {
             print('SWIPE DOWN');
-            await getMessage(); // TODO: remove test
+            // await getMessage(); // TODO: remove test
           } else {
             print('DRAG ZERO');
             if (messageOpen) {
               closeMessage();
+            } else if (!inboxEmpty) {
+              openMessage();
             }
           }
         },
@@ -186,25 +188,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               ),
             )
           ],
-        ),
-      ),
-      Visibility(
-        // bottle tap gesture detector
-        visible: inboxEmpty ? false : true,
-        child: Center(
-          // bottle tap detector
-          heightFactor: 6.5,
-          child: Container(
-            color: Colors.transparent,
-            width: 100,
-            height: 100,
-            alignment: Alignment.center,
-            child: GestureDetector(
-              onTap: () {
-                messageOpen ? closeMessage() : openMessage();
-              },
-            ),
-          ),
         ),
       ),
       Align(
