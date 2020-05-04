@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ocean_network/models/message.dart';
 
 String _currentId; // TODO: store in state
+String _currentBayId;
 var rng = Random();
 
 class DatabaseService {
@@ -15,12 +16,12 @@ class DatabaseService {
     double randomDouble = rng.nextDouble();// rng.nextInt(await getMaxScore());
     switch (randCase) {
       case 0:
-        print('db-getScore: New (3/$maxScore)');
+        print('🔥 db-getScore: New (3/$maxScore)');
         return 3;
         break;
       default:
         int scaledRandom = (randomDouble * (maxScore + 1)).toInt();
-        print('db-getScore: Random ($scaledRandom/$maxScore)');
+        print('🔥 db-getScore: Random ($scaledRandom/$maxScore)');
         return scaledRandom;
         break;
     }
@@ -36,7 +37,7 @@ class DatabaseService {
               .limit(1)
               .getDocuments();
       print(
-          'db-GET: ${docSnapshot.documents.single.documentID} ${docSnapshot.documents.single.data}');
+          '🔥📥 db-GET: ${docSnapshot.documents.single.documentID} ${docSnapshot.documents.single.data}');
       return _parseDocumentSnapshot(docSnapshot.documents.single);
     } catch (e) {
       return Message(body: e.toString());
@@ -45,7 +46,8 @@ class DatabaseService {
 
   // Convert DocumentSnapshot to Message model
   Message _parseDocumentSnapshot(DocumentSnapshot snapshot) {
-    _currentId = snapshot.documentID;
+    _currentId = _currentBayId;
+    _currentBayId = snapshot.documentID;
     // print('db-currentId: $_currentId');
     return Message(
       body: snapshot.data['body'],
@@ -69,7 +71,7 @@ class DatabaseService {
   Future<void> postMessage(String messageOut) async {
     var messageMap = _parseMessageBody(messageOut);
     await messageCollection.document().setData(messageMap);
-    print('db-POST: $messageMap');
+    print('🔥📤 db-POST: $messageMap');
   }
 
   // Update score
@@ -79,7 +81,7 @@ class DatabaseService {
         'score': FieldValue.increment(add),
         'upvotes': FieldValue.increment(1),
       });
-      print('db-Firebase incrementScore');
+      print('🔥👍 db-Firebase incrementScore: $_currentId');
     } catch (e) {
       print(e.toString());
     }
@@ -91,7 +93,7 @@ class DatabaseService {
         'score': FieldValue.increment(-subtract),
         'downvotes': FieldValue.increment(1),
       });
-      print('db-Firebase decrementScore');
+      print('🔥👎 db-Firebase decrementScore: $_currentId');
     } catch (e) {
       print(e.toString());
     }

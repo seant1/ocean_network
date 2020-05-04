@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
@@ -9,14 +11,46 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with WidgetsBindingObserver {
+  // lifecycle events
+  AppLifecycleState _lastLifecycleState;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    print('🔄----------VIEWDIDLOAD');
+    getMessage();
+    startRandomTimer();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      // went to Background
+      print('🔄----------PAUSE');
+    }
+    if (state == AppLifecycleState.resumed) {
+      // came back to Foreground
+      print('🔄----------RESUMED');
+      startRandomTimer();
+    }
+  }
+
   // UI
-  String animateFlag = 'idle';
-  String animateDoor = 'idle';
   String animateSend = 'idle';
   bool inboxEmpty = true;
   bool messageOpen = false;
   bool messageEditing = false;
+
+  Timer _timer = new Timer(Duration(seconds: 0), () => print('⏳ init'));
 
   // data
   Message _messageBayIn = Message(
@@ -42,31 +76,16 @@ class _HomeState extends State<Home> {
         onVerticalDragEnd: (details) async {
           if (details.primaryVelocity < 0) {
             print('SWIPE UP');
-            takeMessage(); // TODO: run takeMessage on a random timer
-            // if (messageOpen) {
-            //   // any changes, also change send button
-            //   postMessage();
-            //   closeMessage();
-            //   setState(() {
-            //     inboxEmpty = true;
-            //     animateSend = 'start';
-            //   });
-            // }
+            // takeMessage(); // TODO: remove test
           } else if (details.primaryVelocity > 0) {
             print('SWIPE DOWN');
-            // if (messageOpen) {
-            //   discardMessage();
-            //   inboxEmpty = true;
-            // } else {
-            await getMessage();
-            // }
+            // await getMessage(); // TODO: remove test
           } else {
             print('DRAG ZERO');
             if (messageOpen) {
               closeMessage();
-              setState(() {
-                inboxEmpty = false; // TODO: handle when dismiss edit card
-              });
+            } else if (!inboxEmpty) {
+              openMessage();
             }
           }
         },
@@ -94,20 +113,21 @@ class _HomeState extends State<Home> {
               'assets/mailbox_v03-door.flr',
               alignment: Alignment.bottomCenter,
               fit: BoxFit.fitWidth,
-              animation: animateDoor,
+              animation: messageOpen ? 'open' : 'close',
             ),
             FlareActor(
               'assets/mailbox_v03-flag.flr',
               alignment: Alignment.bottomCenter,
               fit: BoxFit.fitWidth,
-              animation: animateFlag,
+              animation: inboxEmpty ? 'down' : 'up',
             ),
             FlareActor(
               'assets/mailbox_v03-ground.flr',
               alignment: Alignment.bottomCenter,
               fit: BoxFit.fitWidth,
             ),
-            Text('messageOpen: ${_messageBayIn.body}'),
+            // Text('messageOpen: ${_messageBayIn.body}'),
+            Text('🐛: ${_timer.isActive}'),
             AnimatedOpacity(
               // message card
               opacity: messageOpen ? 1 : 0,
@@ -155,8 +175,7 @@ class _HomeState extends State<Home> {
                               ),
                             ))
                         : Text(
-                            _messageIn
-                                .body, //'"You’ll stop worrying what others think about you when you realize how seldom they do" - David Foster Wallace',
+                            _messageIn.body,
                             style: TextStyle(
                               color: Colors.black87,
                               fontFamily: 'Roboto',
@@ -171,25 +190,6 @@ class _HomeState extends State<Home> {
           ],
         ),
       ),
-      Visibility(
-        // bottle tap gesture detector
-        visible: inboxEmpty ? false : true,
-        child: Center(
-          // bottle tap detector
-          heightFactor: 6.5,
-          child: Container(
-            color: Colors.transparent,
-            width: 100,
-            height: 100,
-            alignment: Alignment.center,
-            child: GestureDetector(
-              onTap: () {
-                openMessage();
-              },
-            ),
-          ),
-        ),
-      ),
       Align(
         alignment: Alignment.bottomRight,
         child: Container(
@@ -198,8 +198,8 @@ class _HomeState extends State<Home> {
             backgroundColor: Colors.grey[400],
             onPressed: () {
               print('TAP: edit');
+              openMessage();
               setState(() {
-                messageOpen = true;
                 messageEditing = true;
               });
             },
@@ -215,14 +215,8 @@ class _HomeState extends State<Home> {
             backgroundColor: Colors.grey[400],
             onPressed: () {
               print('TAP: send');
-              if (messageOpen) {
-                postMessage();
-                closeMessage();
-                setState(() {
-                  inboxEmpty = true;
-                  animateSend = 'start';
-                });
-              }
+              postMessage();
+              if (messageOpen) closeMessage();
             },
             child: Icon(Icons.send),
           ),
@@ -236,12 +230,8 @@ class _HomeState extends State<Home> {
             backgroundColor: Colors.grey[400],
             onPressed: () {
               print('TAP: discard');
-              if (messageOpen) {
-                discardMessage();
-                setState(() {
-                  inboxEmpty = true;
-                });
-              }
+              discardMessage();
+              if (messageOpen) closeMessage();
             },
             child: Icon(Icons.delete),
           ),
@@ -250,42 +240,7 @@ class _HomeState extends State<Home> {
     ]);
   }
 
-  void discardMessage() {
-    messageEditing ? _messageBayOut = '' : DatabaseService().decrementScore(1);
-    setState(() {
-      closeMessage();
-      inboxEmpty = true;
-    });
-  }
-
-  void postMessage() {
-    if (messageEditing) {
-      _messageBayOut != ''
-          ? DatabaseService().postMessage(_messageBayOut)
-          : print('ERROR: Cannot post empty string');
-      _messageBayOut = '';
-    } else {
-      DatabaseService().incrementScore(1);
-    }
-  }
-
-  void closeMessage() {
-    messageOpen = false;
-    messageEditing = false;
-    animateDoor = 'close';
-  }
-
-  void openMessage() {
-    print('TAP: bottle');
-    setState(() {
-      messageOpen = true;
-      inboxEmpty = true;
-      animateDoor = 'open';
-      animateFlag = 'down';
-    });
-  }
-
-  Future getMessage() async {
+  Future getMessage() async { // gets a message from Firestore into messageBayIn
     Message _gotMessage = await DatabaseService().getMessage();
     // print('NEW messageIn.body: ${newMessageIn.body}');
     setState(() {
@@ -293,12 +248,77 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void takeMessage() {
+  void takeMessage() { // takes message from messageBayIn into mailbox (messageIn)
+    print('📥📫 take message');
     setState(() {
       _messageIn = _messageBayIn;
       inboxEmpty = false;
-      animateFlag = 'up';
     });
-    getMessage(); // get a new message into the messageBayIn
+    getMessage();
+  }
+
+  void openMessage() {
+    print('open message');
+    setState(() {
+      messageOpen = true;
+    });
+  }
+
+  void closeMessage() {
+    print('close message');
+    setState(() {
+      messageOpen = false;
+      messageEditing = false;
+    });
+  }
+
+  void postMessage() {
+    if (messageOpen) {
+      if (messageEditing) {
+        _messageBayOut != ''
+            ? DatabaseService().postMessage(_messageBayOut)
+            : print('ERROR: Cannot post empty string');
+        setState(() {
+          _messageBayOut = '';
+        });
+      } else {
+        DatabaseService().incrementScore(1);
+      }
+      setState(() {
+        inboxEmpty = true;
+        animateSend = 'start';
+      });
+      startRandomTimer();
+    }
+  }
+
+  void discardMessage() {
+    if (messageOpen) {
+      if (messageEditing) {
+        setState(() {
+          _messageBayOut = '';
+        });
+      } else {
+        DatabaseService().decrementScore(1);
+      }
+      setState(() {
+        inboxEmpty = true;
+      });
+      startRandomTimer();
+    }
+  }
+
+  void startRandomTimer() {
+    if (inboxEmpty && !_timer.isActive) {
+      const int maxTime = 30;
+      const int minTime = 5;
+      Duration duration =
+          Duration(seconds: rng.nextInt(maxTime - minTime) + minTime);
+      print('⏳ startRandomTimer (${duration.inSeconds} seconds)');
+      _timer = new Timer(duration, () {
+        print('⌛ done');
+        takeMessage();
+      });
+    }
   }
 }
