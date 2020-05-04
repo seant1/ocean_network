@@ -50,6 +50,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   bool messageOpen = false;
   bool messageEditing = false;
 
+  Timer _timer = new Timer(Duration(seconds: 0), () => print('⏳ init'));
+
   // data
   Message _messageBayIn = Message(
     // might only actually need to be the messageBody
@@ -74,10 +76,10 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         onVerticalDragEnd: (details) async {
           if (details.primaryVelocity < 0) {
             print('SWIPE UP');
-            takeMessage(); // TODO: run takeMessage on a random timer
+            takeMessage(); // TODO: remove test
           } else if (details.primaryVelocity > 0) {
             print('SWIPE DOWN');
-            await getMessage();
+            await getMessage(); // TODO: remove test
           } else {
             print('DRAG ZERO');
             if (messageOpen) {
@@ -123,7 +125,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               fit: BoxFit.fitWidth,
             ),
             // Text('messageOpen: ${_messageBayIn.body}'),
-            Text('bay: ${_messageBayIn.body}'),
+            Text('🐛: ${_timer.isActive}'),
             AnimatedOpacity(
               // message card
               opacity: messageOpen ? 1 : 0,
@@ -255,7 +257,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     ]);
   }
 
-  Future getMessage() async {
+  Future getMessage() async { // gets a message from Firestore into messageBayIn
     Message _gotMessage = await DatabaseService().getMessage();
     // print('NEW messageIn.body: ${newMessageIn.body}');
     setState(() {
@@ -263,13 +265,13 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     });
   }
 
-  void takeMessage() {
+  void takeMessage() { // takes message from messageBayIn into mailbox (messageIn)
     print('📥📫 take message');
     setState(() {
       _messageIn = _messageBayIn;
       inboxEmpty = false;
     });
-    getMessage(); // get a new message into the messageBayIn
+    getMessage();
   }
 
   void openMessage() {
@@ -324,13 +326,13 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   }
 
   void startRandomTimer() {
-    if (inboxEmpty) {
-      const int maxTime = 20;
+    if (inboxEmpty && !_timer.isActive) {
+      const int maxTime = 30;
       const int minTime = 5;
       Duration duration =
           Duration(seconds: rng.nextInt(maxTime - minTime) + minTime);
       print('⏳ startRandomTimer (${duration.inSeconds} seconds)');
-      new Timer(duration, () {
+      _timer = new Timer(duration, () {
         print('⌛ done');
         takeMessage();
       });
