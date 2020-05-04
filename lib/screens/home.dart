@@ -21,7 +21,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     print('🔄----------VIEWDIDLOAD');
     getMessage();
-    startRandomTimer();
+    Timer(Duration(microseconds: 1), () => startRandomTimer()); // timer needed to ensure this is run after _timer init
   }
 
   @override
@@ -55,6 +55,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   // data
   Message _messageBayIn = Message(
     // might only actually need to be the messageBody
+    id: 'defaultId',
     body: 'DEFAULT INCOMING',
     uid: 'defaultman',
     timestamp: Timestamp.now(),
@@ -62,6 +63,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   );
   Message _messageIn = Message(
     // might only actually need to be the messageBody
+    id: 'defaultId',
     body: 'DEFAULT INCOMING',
     uid: 'defaultman',
     timestamp: Timestamp.now(),
@@ -127,7 +129,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               fit: BoxFit.fitWidth,
             ),
             // Text('messageOpen: ${_messageBayIn.body}'),
-            Text('🐛: ${_timer.isActive}'),
+            Text('🐛: ${_messageIn.id}'),
             AnimatedOpacity(
               // message card
               opacity: messageOpen ? 1 : 0,
@@ -293,7 +295,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           _messageBayOut = '';
         });
       } else {
-        DatabaseService().incrementScore(1);
+        DatabaseService().incrementScore(_messageIn.id);
       }
       setState(() {
         inboxEmpty = true;
@@ -310,7 +312,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           _messageBayOut = '';
         });
       } else {
-        DatabaseService().decrementScore(1);
+        DatabaseService().decrementScore(_messageIn.id);
       }
       setState(() {
         inboxEmpty = true;
@@ -321,7 +323,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   void startRandomTimer() {
     if (inboxEmpty && !_timer.isActive) {
-      const int maxTime = 30;
+      const int maxTime = 6;//30;
       const int minTime = 5;
       Duration duration =
           Duration(seconds: rng.nextInt(maxTime - minTime) + minTime);

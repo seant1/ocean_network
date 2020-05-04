@@ -3,8 +3,6 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ocean_network/models/message.dart';
 
-String _currentId; // TODO: store in state
-String _currentBayId;
 var rng = Random();
 
 class DatabaseService {
@@ -13,7 +11,7 @@ class DatabaseService {
 
   int _getScore(int maxScore) {
     int randCase = rng.nextInt(3);
-    double randomDouble = rng.nextDouble();// rng.nextInt(await getMaxScore());
+    double randomDouble = rng.nextDouble(); // rng.nextInt(await getMaxScore());
     switch (randCase) {
       case 0:
         print('🔥 db-getScore: New (3/$maxScore)');
@@ -33,7 +31,8 @@ class DatabaseService {
       var docSnapshot =
           // await messageCollection.orderBy('score', descending: true).limit(1).getDocuments();
           await messageCollection
-              .where('score', isGreaterThanOrEqualTo: _getScore(await getMaxScore()))
+              .where('score',
+                  isGreaterThanOrEqualTo: _getScore(await getMaxScore()))
               .limit(1)
               .getDocuments();
       print(
@@ -46,10 +45,8 @@ class DatabaseService {
 
   // Convert DocumentSnapshot to Message model
   Message _parseDocumentSnapshot(DocumentSnapshot snapshot) {
-    _currentId = _currentBayId;
-    _currentBayId = snapshot.documentID;
-    // print('db-currentId: $_currentId');
     return Message(
+      id: snapshot.documentID,
       body: snapshot.data['body'],
       uid: snapshot.data['uid'],
       timestamp: snapshot.data['timestamp'],
@@ -75,25 +72,25 @@ class DatabaseService {
   }
 
   // Update score
-  void incrementScore(int add) async {
+  void incrementScore(String messageId) async {
     try {
-      await messageCollection.document(_currentId).updateData({
-        'score': FieldValue.increment(add),
+      await messageCollection.document(messageId).updateData({
+        'score': FieldValue.increment(1),
         'upvotes': FieldValue.increment(1),
       });
-      print('🔥👍 db-Firebase incrementScore: $_currentId');
+      print('🔥👍 db-Firebase incrementScore: $messageId');
     } catch (e) {
       print(e.toString());
     }
   }
 
-  void decrementScore(int subtract) async {
+  void decrementScore(String messageId) async {
     try {
-      await messageCollection.document(_currentId).updateData({
-        'score': FieldValue.increment(-subtract),
+      await messageCollection.document(messageId).updateData({
+        'score': FieldValue.increment(-1),
         'downvotes': FieldValue.increment(1),
       });
-      print('🔥👎 db-Firebase decrementScore: $_currentId');
+      print('🔥👎 db-Firebase decrementScore: $messageId');
     } catch (e) {
       print(e.toString());
     }
