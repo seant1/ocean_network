@@ -39,13 +39,13 @@ class _HomeState extends State<Home> {
       GestureDetector(
         onVerticalDragEnd: (details) async {
           if (details.primaryVelocity < 0) {
-            print('SWIPE UP');
+            print('🔼 SWIPE UP');
             takeMessage(); // TODO: run takeMessage on a random timer
           } else if (details.primaryVelocity > 0) {
-            print('SWIPE DOWN');
+            print('🔽 SWIPE DOWN');
             await getMessage();
           } else {
-            print('DRAG ZERO');
+            print('⏺ DRAG ZERO');
             if (messageOpen) {
               closeMessage();
             }
