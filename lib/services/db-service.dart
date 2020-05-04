@@ -9,20 +9,30 @@ class DatabaseService {
   final CollectionReference messageCollection =
       Firestore.instance.collection('messages');
 
+  int lastScore;
+
   int _getScore(int maxScore) {
+    int score;
     int randCase = rng.nextInt(3);
     double randomDouble = rng.nextDouble(); // rng.nextInt(await getMaxScore());
     switch (randCase) {
       case 0:
-        print('🔥 db-getScore: New (3/$maxScore)');
-        return 3;
+        // print('🔥 db-getScore: New (3/$maxScore)');
+        score = 3;
         break;
       default:
-        int scaledRandom = (randomDouble * (maxScore + 1)).toInt();
-        print('🔥 db-getScore: Random ($scaledRandom/$maxScore)');
-        return scaledRandom;
+        int scaledRandom = (randomDouble * (maxScore)).toInt();
+        // print('🔥 db-getScore: Random ($scaledRandom/$maxScore)');
+        score = scaledRandom;
         break;
     }
+    if (score == lastScore) { // if duplicate consecutive scores
+      print('duplicate consecutive score ($score --> ${score + 1})');
+      score++;
+    }
+    print('🔥 db-getScore: ($score/$maxScore)');
+    lastScore = score;
+    return score;
   }
 
   // Get random message
