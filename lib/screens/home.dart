@@ -190,57 +190,67 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           ],
         ),
       ),
-      Align(
-        alignment: Alignment.bottomRight,
-        child: Container(
-          padding: EdgeInsets.all(50.0),
-          child: FloatingActionButton(
-            backgroundColor: Colors.grey[400],
-            onPressed: () {
-              print('TAP: edit');
-              openMessage();
-              setState(() {
-                messageEditing = true;
-              });
-            },
-            child: Icon(Icons.edit),
+      Visibility(
+        visible: !messageOpen,
+        child: Align(
+          alignment: Alignment.bottomRight,
+          child: Container(
+            padding: EdgeInsets.all(50.0),
+            child: FloatingActionButton(
+              backgroundColor: Colors.grey[400],
+              onPressed: () {
+                print('TAP: edit');
+                openMessage();
+                setState(() {
+                  messageEditing = true;
+                });
+              },
+              child: Icon(Icons.edit),
+            ),
           ),
         ),
       ),
-      Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          padding: EdgeInsets.all(50.0),
-          child: FloatingActionButton(
-            backgroundColor: Colors.grey[400],
-            onPressed: () {
-              print('TAP: send');
-              postMessage();
-              if (messageOpen) closeMessage();
-            },
-            child: Icon(Icons.send),
+      Visibility(
+        visible: messageOpen,
+        child: Align(
+          alignment: Alignment.bottomRight,
+          child: Container(
+            padding: EdgeInsets.all(50.0),
+            child: FloatingActionButton(
+              backgroundColor: Colors.grey[400],
+              onPressed: () {
+                print('TAP: send');
+                postMessage();
+                if (messageOpen) closeMessage();
+              },
+              child: Icon(Icons.send),
+            ),
           ),
         ),
       ),
-      Align(
-        alignment: Alignment.bottomLeft,
-        child: Container(
-          padding: EdgeInsets.all(50.0),
-          child: FloatingActionButton(
-            backgroundColor: Colors.grey[400],
-            onPressed: () {
-              print('TAP: discard');
-              discardMessage();
-              if (messageOpen) closeMessage();
-            },
-            child: Icon(Icons.delete),
+      Visibility(
+        visible: messageOpen,
+        child: Align(
+          alignment: Alignment.bottomLeft,
+          child: Container(
+            padding: EdgeInsets.all(50.0),
+            child: FloatingActionButton(
+              backgroundColor: Colors.grey[400],
+              onPressed: () {
+                print('TAP: discard');
+                discardMessage();
+                if (messageOpen) closeMessage();
+              },
+              child: Icon(Icons.delete),
+            ),
           ),
         ),
       ),
     ]);
   }
 
-  Future getMessage() async { // gets a message from Firestore into messageBayIn
+  Future getMessage() async {
+    // gets a message from Firestore into messageBayIn
     Message _gotMessage = await DatabaseService().getMessage();
     // print('NEW messageIn.body: ${newMessageIn.body}');
     setState(() {
@@ -248,7 +258,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     });
   }
 
-  void takeMessage() { // takes message from messageBayIn into mailbox (messageIn)
+  void takeMessage() {
+    // takes message from messageBayIn into mailbox (messageIn)
     print('📥📫 take message');
     setState(() {
       _messageIn = _messageBayIn;
