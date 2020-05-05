@@ -2,11 +2,12 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
+import 'package:ocean_network/services/db-service.dart';
 
-/// running FirestoreImporter().importMessages() will import JSON data from assets
 
-class FirestoreImporter {
-  
+class FirestoreManager {
+  /// FIRESTORE IMPORTER
+  /// running FirestoreImporter().importMessages() will import JSON data from assets
   String jsonFile = 'assets/test.json'; // works with array of JSON objects
   String jsonImportField = 'text'; // String field of each JSON object
   
@@ -29,6 +30,8 @@ class FirestoreImporter {
       'uid': 'import',
       'timestamp': Timestamp.now(),
       'score': 3,
+      'upvotes': 0,
+      'downvotes': 0,
     };
   }
 }

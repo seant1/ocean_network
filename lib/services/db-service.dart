@@ -77,6 +77,8 @@ class DatabaseService {
       'uid': 'programmatic',
       'timestamp': Timestamp.now(),
       'score': 3,
+      'upvotes': 0, // important for query sorting
+      'downvotes': 0, // important for query sorting
     };
   }
 
