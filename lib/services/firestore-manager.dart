@@ -54,7 +54,7 @@ class FirestoreManager {
   }
 
   /// FIRESTORE UPDATER (modify as needed)
-  /// Currently: Adds an 'upvotes' = 0 or 'downvotes' = 0 field if field does not exist in document where the 'score' is less than 25
+  /// Currently: Resets scores, upvotes, downvotes
   /// Usage: FirestoreManager().batchUpdate();
   void batchUpdate() async {
     Query _updateQuery =
@@ -64,25 +64,32 @@ class FirestoreManager {
     int _queryMatchCount = 0;
     int _updateCount = 0;
 
-    int _nullUpvotesCount = 0; // CONDITION #1 COUNT
-    int _nullDownvotesCount = 0; // CONDITION #2 COUNT
+    int _resetUpvotesCount = 0; // CONDITION #1 COUNT
+    int _resetDownvotesCount = 0; // CONDITION #2 COUNT
+    int _resetScoreCount = 0; // CONDITION #2 COUNT
 
     QuerySnapshot _docsToUpdate = await _updateQuery.getDocuments();
     _docsToUpdate.documents.forEach((doc) {
       bool _updated = false;
-      if (doc.data['upvotes'] == null) {
+      if (doc.data['upvotes'] != 0) {
         // MODIFY UPDATE CONDITION #1
-        print("🔥🔄db-UPDATE (add 'upvotes'): ${doc.documentID} ${doc.data}");
+        print("🔥🔄db-UPDATE (reset 'upvotes'): ${doc.documentID} ${doc.data}");
         // messageCollection.document(doc.documentID).updateData({'upvotes': 0});
-        _nullUpvotesCount++;
         _updated = true;
+        _resetUpvotesCount++;
       }
-      if (doc.data['downvotes'] == null) {
+      if (doc.data['downvotes'] != 0) {
         // MODIFY UPDATE CONDITION #2
-        print("🔥🔄db-UPDATE (add 'downvotes'): ${doc.documentID} ${doc.data}");
+        print("🔥🔄db-UPDATE (reset 'downvotes'): ${doc.documentID} ${doc.data}");
         // messageCollection.document(doc.documentID).updateData({'downvotes': 0});
-        _nullDownvotesCount++;
         _updated = true;
+        _resetDownvotesCount++;
+      }
+      if (doc.data['score'] != 3) {
+        print("🔥🔄db-UPDATE (reset 'score'): ${doc.documentID} ${doc.data}");
+        // messageCollection.document(doc.documentID).updateData({'score': 3});
+        _updated = true;
+        _resetScoreCount++;
       }
       _updated
           ? _updateCount++
@@ -90,8 +97,9 @@ class FirestoreManager {
               "🔥❎db-UPDATE (queried, not updated): ${doc.documentID} ${doc.data}");
       _queryMatchCount++;
     });
-    print('nullUpvotes: $_nullUpvotesCount/$_queryMatchCount');
-    print('nullDownvotes: $_nullDownvotesCount/$_queryMatchCount');
+    print('resetUpvotes: $_resetUpvotesCount/$_queryMatchCount');
+    print('resetDownvotes: $_resetDownvotesCount/$_queryMatchCount');
+    print('resetScore: $_resetScoreCount/$_queryMatchCount');
     print(
         '🔥🔥🔥BATCH UPDATE🔥🔥🔥: $_updateCount/$_queryMatchCount documents updated ✅');
   }
