@@ -324,8 +324,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   void startRandomTimer() {
     if (inboxEmpty && !_timer.isActive) {
-      const int maxTime = 6;//30;
-      const int minTime = 5;
+      const int maxTime = 4;//30;
+      const int minTime = 3;//5;
       Duration duration =
           Duration(seconds: rng.nextInt(maxTime - minTime) + minTime);
       print('⏳ startRandomTimer (${duration.inSeconds} seconds)');

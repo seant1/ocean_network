@@ -54,8 +54,9 @@ class DatabaseService {
           '🔥📥 db-GET: ${docSnapshot.documents.single.documentID} ${docSnapshot.documents.single.data}');
       return _parseDocumentSnapshot(docSnapshot.documents.single);
     } catch (e) {
-      print(e);
-      return Message(body: e.toString());
+      print('❗ $e');
+      print('getting message again');
+      return getMessage();//Message(body: e.toString());
     }
   }
 
