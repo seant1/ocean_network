@@ -6,6 +6,7 @@ class Message {
   final String uid;
   final Timestamp timestamp;
   final int score;
+  // does not include 'upvotes' and 'downvotes' fields because not currently used
 
   Message({this.id, this.body, this.uid, this.timestamp, this.score});
 }
