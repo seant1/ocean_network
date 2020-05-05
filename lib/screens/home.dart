@@ -21,7 +21,10 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     print('🔄----------VIEWDIDLOAD');
     getMessage();
-    Timer(Duration(microseconds: 1), () => startRandomTimer()); // timer needed to ensure this is run after _timer init
+    Timer(
+        Duration(microseconds: 1),
+        () =>
+            startRandomTimer()); // timer needed to ensure this is run after _timer init
   }
 
   @override
@@ -79,9 +82,13 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         onVerticalDragEnd: (details) async {
           if (details.primaryVelocity < 0) {
             print('SWIPE UP');
+            postMessage();
+            if (messageOpen) closeMessage();
             // takeMessage(); // TODO: remove test
           } else if (details.primaryVelocity > 0) {
             print('SWIPE DOWN');
+            discardMessage();
+            if (messageOpen) closeMessage();
             // await getMessage(); // TODO: remove test
           } else {
             print('DRAG ZERO');
@@ -324,8 +331,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   void startRandomTimer() {
     if (inboxEmpty && !_timer.isActive) {
-      const int maxTime = 4;//30;
-      const int minTime = 3;//5;
+      const int maxTime = 4; //30;
+      const int minTime = 3; //5;
       Duration duration =
           Duration(seconds: rng.nextInt(maxTime - minTime) + minTime);
       print('⏳ startRandomTimer (${duration.inSeconds} seconds)');
