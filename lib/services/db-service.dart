@@ -45,12 +45,16 @@ class DatabaseService {
           await messageCollection
               .where('score',
                   isGreaterThanOrEqualTo: _getScore(await getMaxScore()))
+              .orderBy('score')
+              .orderBy(
+                  'downvotes') // IF REMOVED, remove Firstore composite index for "score_downvotes"
               .limit(1)
               .getDocuments();
       print(
           '🔥📥 db-GET: ${docSnapshot.documents.single.documentID} ${docSnapshot.documents.single.data}');
       return _parseDocumentSnapshot(docSnapshot.documents.single);
     } catch (e) {
+      print(e);
       return Message(body: e.toString());
     }
   }
@@ -112,7 +116,8 @@ class DatabaseService {
     print('lastMaxScore: $_lastMaxScore');
     int _maxScore;
     try {
-      var docSnapshot = _lastMaxScore[0] >= 4 // reduces max score every time until 4, then restarts from max
+      var docSnapshot = _lastMaxScore[0] >
+              4 // reduces max score every time until 4, then restarts from max
           ? await messageCollection
               .orderBy('score', descending: true)
               .startAfter(_lastMaxScore) // second highest scoring message
