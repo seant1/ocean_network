@@ -152,7 +152,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                     padding: EdgeInsets.all(35.0),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(30.0),
-                      color: Colors.white,
+                      color: Colors.grey[800],
                       boxShadow: [
                         BoxShadow(
                             blurRadius: 60.0,
@@ -162,7 +162,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                     ),
                     child: messageEditing
                         ? Material(
-                            color: Colors.white,
+                            color: Colors.grey[800],
                             child: Form(
                               child: TextFormField(
                                 initialValue: _messageBayOut,
@@ -170,14 +170,15 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                                     setState(() => _messageBayOut = val),
                                 maxLines: null,
                                 style: TextStyle(
-                                  color: Colors.black87,
+                                  color: Colors.grey[400],
                                   fontFamily: 'Roboto',
                                   fontWeight: FontWeight.normal,
                                   fontSize: 25,
                                   decoration: TextDecoration.none,
                                 ),
                                 decoration: InputDecoration(
-                                  hintText: 'Write to a random person',
+                                  hintText: 'Write a card to a someone',
+                                  hintStyle: TextStyle(color: Colors.grey[600]),
                                   hintMaxLines:
                                       100, // can't have unlimited for some reason
                                   border: InputBorder.none,
@@ -187,13 +188,13 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                         : Text(
                             _messageIn.body,
                             style: TextStyle(
-                              color: Colors.black87,
+                              color: Colors.grey[300],
                               fontFamily: 'Roboto',
                               fontWeight: FontWeight.normal,
                               fontSize: 25,
                               decoration: TextDecoration.none,
                             ),
-                            textAlign: TextAlign.center,
+                            textAlign: TextAlign.left,
                           )),
               ),
             )
