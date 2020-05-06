@@ -290,7 +290,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     print('close message');
     setState(() {
       messageOpen = false;
-      messageEditing = false;
+      Timer(Duration(milliseconds: 200), () => messageEditing = false); // wait for animated opacity
     });
   }
 
