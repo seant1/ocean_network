@@ -21,7 +21,10 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     print('🔄----------VIEWDIDLOAD');
     getMessage();
-    Timer(Duration(microseconds: 1), () => startRandomTimer()); // timer needed to ensure this is run after _timer init
+    Timer(
+        Duration(microseconds: 1),
+        () =>
+            startRandomTimer()); // timer needed to ensure this is run after _timer init
   }
 
   @override
@@ -79,9 +82,13 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         onVerticalDragEnd: (details) async {
           if (details.primaryVelocity < 0) {
             print('SWIPE UP');
+            postMessage();
+            if (messageOpen) closeMessage();
             // takeMessage(); // TODO: remove test
           } else if (details.primaryVelocity > 0) {
             print('SWIPE DOWN');
+            discardMessage();
+            if (messageOpen) closeMessage();
             // await getMessage(); // TODO: remove test
           } else {
             print('DRAG ZERO');
@@ -145,7 +152,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                     padding: EdgeInsets.all(35.0),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(30.0),
-                      color: Colors.white,
+                      color: Colors.grey[800],
                       boxShadow: [
                         BoxShadow(
                             blurRadius: 60.0,
@@ -155,7 +162,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                     ),
                     child: messageEditing
                         ? Material(
-                            color: Colors.white,
+                            color: Colors.grey[800],
                             child: Form(
                               child: TextFormField(
                                 initialValue: _messageBayOut,
@@ -163,14 +170,15 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                                     setState(() => _messageBayOut = val),
                                 maxLines: null,
                                 style: TextStyle(
-                                  color: Colors.black87,
+                                  color: Colors.grey[400],
                                   fontFamily: 'Roboto',
                                   fontWeight: FontWeight.normal,
                                   fontSize: 25,
                                   decoration: TextDecoration.none,
                                 ),
                                 decoration: InputDecoration(
-                                  hintText: 'Write to a random person',
+                                  hintText: 'Write a card to a someone',
+                                  hintStyle: TextStyle(color: Colors.grey[600]),
                                   hintMaxLines:
                                       100, // can't have unlimited for some reason
                                   border: InputBorder.none,
@@ -180,13 +188,13 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                         : Text(
                             _messageIn.body,
                             style: TextStyle(
-                              color: Colors.black87,
+                              color: Colors.grey[300],
                               fontFamily: 'Roboto',
                               fontWeight: FontWeight.normal,
                               fontSize: 25,
                               decoration: TextDecoration.none,
                             ),
-                            textAlign: TextAlign.center,
+                            textAlign: TextAlign.left,
                           )),
               ),
             )
@@ -324,8 +332,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   void startRandomTimer() {
     if (inboxEmpty && !_timer.isActive) {
-      const int maxTime = 4;//30;
-      const int minTime = 3;//5;
+      const int maxTime = 4; //30;
+      const int minTime = 3; //5;
       Duration duration =
           Duration(seconds: rng.nextInt(maxTime - minTime) + minTime);
       print('⏳ startRandomTimer (${duration.inSeconds} seconds)');

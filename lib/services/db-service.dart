@@ -10,19 +10,31 @@ class DatabaseService {
       Firestore.instance.collection('messages');
 
   int _lastScore;
-  List<int> _lastMaxScore = [4];
+  List<int> _lastMaxScore = [4]; // guarantees first message will get real max
+  int _minMaxScore = 8; // minimum maxScore for looping max
 
   int _getScore(int maxScore) {
     int score;
-    int randCase = rng.nextInt(3);
-    double randomDouble = rng.nextDouble(); // rng.nextInt(await getMaxScore());
+    int _minScore;
+    bool _newMessageBoost = false;
+    if (maxScore >= 22) {
+      _minScore = 1;
+    } else if (maxScore >= 13) {
+      _minScore = 2;
+    } else if (maxScore >= 4) {
+      _minScore = 3;
+    } else {
+      _minScore = maxScore - maxScore.abs();
+    }
+    int randCase = maxScore >= 3 ? rng.nextInt(3) : null;
     switch (randCase) {
       case 0:
         // print('🔥 db-getScore: New (3/$maxScore)');
+        _newMessageBoost = true;
         score = 3;
         break;
       default:
-        int scaledRandom = (randomDouble * (maxScore)).toInt();
+        int scaledRandom = (rng.nextDouble() * (maxScore - _minScore + 1)).toInt() + _minScore; // (maxScore - _minScore + 1) to make inclusive
         // print('🔥 db-getScore: Random ($scaledRandom/$maxScore)');
         score = scaledRandom;
         break;
@@ -32,7 +44,7 @@ class DatabaseService {
       print('duplicate consecutive score ($score --> ${score + 1})');
       score++;
     }
-    print('🔥 db-getScore: ($score/$maxScore)');
+    print('🔥 db-getScore: $_minScore..[$score]..$maxScore${_newMessageBoost && score == 3 ? ' (NEW)' : ''}');
     _lastScore = score;
     return score;
   }
@@ -120,7 +132,7 @@ class DatabaseService {
     int _maxScore;
     try {
       var docSnapshot = _lastMaxScore[0] >
-              4 // reduces max score every time until 4, then restarts from max
+              _minMaxScore // reduces max score every time until 7 (before chance of getting downvoted becomes higher than upvoted), then restarts from max
           ? await messageCollection
               .orderBy('score', descending: true)
               .startAfter(_lastMaxScore) // second highest scoring message
