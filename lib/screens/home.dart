@@ -291,22 +291,29 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   }
 
   void postMessage() {
+    bool _posted = false;
     if (messageOpen) {
       if (messageEditing) {
-        _messageBayOut != ''
-            ? db.postMessage(_messageBayOut)
-            : print('ERROR: Cannot post empty string');
+        if (_messageBayOut != '') {
+          db.postMessage(_messageBayOut);
+          _posted = true;
+        } else {
+          print('❗ postMessage(): Cannot post empty string');
+        }
         setState(() {
           _messageBayOut = '';
         });
       } else {
         db.incrementScore(_messageIn.id);
+        _posted = true;
       }
-      setState(() {
-        inboxEmpty = true;
-        animateSend = 'start';
-      });
-      startRandomTimer();
+      if (_posted) { // empties inbox even if posting new message
+        setState(() {
+          inboxEmpty = true;
+          animateSend = 'start';
+        });
+        startRandomTimer();
+      }
     }
   }
 
