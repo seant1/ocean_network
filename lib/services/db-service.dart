@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ocean_network/models/constants.dart';
 import 'package:ocean_network/models/message.dart';
 
 var rng = Random();
@@ -66,9 +67,8 @@ class DatabaseService {
           '🔥📥 db-GET: ${docSnapshot.documents.single.documentID} ${docSnapshot.documents.single.data}');
       return _parseDocumentSnapshot(docSnapshot.documents.single);
     } catch (e) {
-      print('❗ $e');
-      print('getting message again');
-      return getMessage();//Message(body: e.toString());
+      print('❗ getMessage(): $e');
+      return defaultMessage; // getting message again would loop infinitely if keeps erroring e.g. when offline
     }
   }
 
@@ -111,7 +111,7 @@ class DatabaseService {
       });
       print('🔥👍 db-Firebase incrementScore: $messageId');
     } catch (e) {
-      print(e.toString());
+      print('❗ incrementScore(): ${e.toString()}');
     }
   }
 
@@ -123,7 +123,7 @@ class DatabaseService {
       });
       print('🔥👎 db-Firebase decrementScore: $messageId');
     } catch (e) {
-      print(e.toString());
+      print('❗ decrementScore(): ${e.toString()}');
     }
   }
 
@@ -150,7 +150,7 @@ class DatabaseService {
         return 4;
       }
     } catch (e) {
-      print('db-MaxScore: ${e.toString()}');
+      print('❗ getMaxScore(): ${e.toString()}');
       return 4;
     }
     if (_lastMaxScore.isNotEmpty) _lastMaxScore.clear();

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
+import 'package:ocean_network/models/constants.dart';
 import 'package:ocean_network/models/message.dart';
 import 'package:ocean_network/services/db-service.dart';
 
@@ -57,22 +58,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   // data
   DatabaseService db = DatabaseService();
-  Message _messageBayIn = Message(
-    // might only actually need to be the messageBody
-    id: 'defaultId',
-    body: 'DEFAULT INCOMING',
-    uid: 'defaultman',
-    timestamp: Timestamp.now(),
-    score: 0,
-  );
-  Message _messageIn = Message(
-    // might only actually need to be the messageBody
-    id: 'defaultId',
-    body: 'DEFAULT INCOMING',
-    uid: 'defaultman',
-    timestamp: Timestamp.now(),
-    score: 0,
-  );
+
+  Message _messageBayIn = defaultMessage;
+  Message _messageIn = defaultMessage;
   String _messageBayOut = '';
 
   @override
@@ -271,11 +259,18 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   void takeMessage() {
     // takes message from messageBayIn into mailbox (messageIn)
-    print('📥📫 take message');
-    setState(() {
-      _messageIn = _messageBayIn;
-      inboxEmpty = false;
-    });
+    if (_messageBayIn.body != '') {
+      print('📥📫 take message');
+      setState(() {
+        _messageIn = _messageBayIn;
+        _messageBayIn = defaultMessage;
+        inboxEmpty = false;
+      });
+    } else {
+      print('❗ takeMessage(): messageBayIn is empty');
+      // if offline, messageIn is empty so can't post/discard message to restart timer
+      // restarting timer here would loop infinitely, Firestore attempts to get ALL failed requests when reconnected
+    }
     getMessage();
   }
 
@@ -290,27 +285,35 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     print('close message');
     setState(() {
       messageOpen = false;
-      Timer(Duration(milliseconds: 200), () => messageEditing = false); // wait for animated opacity
+      Timer(Duration(milliseconds: 200),
+          () => messageEditing = false); // wait for animated opacity
     });
   }
 
   void postMessage() {
+    bool _posted = false;
     if (messageOpen) {
       if (messageEditing) {
-        _messageBayOut != ''
-            ? db.postMessage(_messageBayOut)
-            : print('ERROR: Cannot post empty string');
+        if (_messageBayOut != '') {
+          db.postMessage(_messageBayOut);
+          _posted = true;
+        } else {
+          print('❗ postMessage(): Cannot post empty string');
+        }
         setState(() {
           _messageBayOut = '';
         });
       } else {
         db.incrementScore(_messageIn.id);
+        _posted = true;
       }
-      setState(() {
-        inboxEmpty = true;
-        animateSend = 'start';
-      });
-      startRandomTimer();
+      if (_posted) { // empties inbox even if posting new message
+        setState(() {
+          inboxEmpty = true;
+          animateSend = 'start';
+        });
+        startRandomTimer();
+      }
     }
   }
 
