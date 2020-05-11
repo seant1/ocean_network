@@ -70,14 +70,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         onVerticalDragEnd: (details) async {
           if (details.primaryVelocity < 0) {
             print('SWIPE UP');
-            postMessage();
-            if (messageOpen) closeMessage();
-            // takeMessage(); // TODO: remove test
           } else if (details.primaryVelocity > 0) {
             print('SWIPE DOWN');
-            discardMessage();
-            if (messageOpen) closeMessage();
-            // await getMessage(); // TODO: remove test
           } else {
             print('DRAG ZERO');
             if (messageOpen) {
@@ -192,9 +186,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       Visibility(
         visible: !messageOpen,
         child: Align(
-          alignment: Alignment.bottomRight,
+          alignment: Alignment.bottomCenter,
           child: Container(
-            padding: EdgeInsets.all(50.0),
+            padding: EdgeInsets.all(25.0),
             child: FloatingActionButton(
               backgroundColor: Colors.grey[400],
               onPressed: () {
@@ -214,7 +208,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         child: Align(
           alignment: Alignment.bottomRight,
           child: Container(
-            padding: EdgeInsets.all(50.0),
+            padding: EdgeInsets.symmetric(vertical: 25.0, horizontal: 75.0),
             child: FloatingActionButton(
               backgroundColor: Colors.grey[400],
               onPressed: () {
@@ -232,7 +226,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         child: Align(
           alignment: Alignment.bottomLeft,
           child: Container(
-            padding: EdgeInsets.all(50.0),
+            padding: EdgeInsets.symmetric(vertical: 25.0, horizontal: 75.0),
             child: FloatingActionButton(
               backgroundColor: Colors.grey[400],
               onPressed: () {
